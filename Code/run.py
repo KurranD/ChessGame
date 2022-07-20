@@ -1,27 +1,12 @@
 import pygame
 import sys
 import os
+import time
 
 from pygame.locals import *
 
 from Classes.button import Button
 from gamelogic import Game
-
-def menu_display(game_state):
-    bg = pygame.image.load(os.path.join('./', 'Images/Menu.png'))
-    if start_button.click():
-        bg = pygame.image.load(os.path.join('./', 'Images/chess_board.jpg'))
-        game_state_manager(game_state, 'game')
-    if exit_button.click():
-        sys.exit()
-    return bg
-
-def game_display():
-    return False
-
-def game_state_manager(game_state, new_state):
-    game_state.clear()
-    game_state.append(new_state)
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -40,12 +25,16 @@ while True:
     screen.fill((0,0,0))
     clock.tick(60)
     if 'menu' in game_state:
-        bg = menu_display(game_state)
+        bg = game.menu_display(game_state, start_button, exit_button)
         screen.blit(bg, (0, 0))
     elif 'game' in game_state:
         screen.blit(bg, (0, 0))
         game.draw_pieces(screen)
         game.game(screen)
+    elif 'gameOver' in game_state:
+        game.create_game(screen)
+        time.sleep(0.2)
+        game.game_state_manager(game_state, 'menu')
     
     x, y = pygame.mouse.get_pos()
 

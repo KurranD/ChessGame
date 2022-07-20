@@ -1,5 +1,6 @@
 from Classes.button import Button
 import json
+from Classes.abstract_piece import *
 
 class Board():
     def __init__(self, board_pos, firstPlayer, secondPlayer):
@@ -13,15 +14,25 @@ class Board():
     def return_board_pos(self):
         return self.board_pos
 
+    def exchange_pawn_piece(self, piece):
+        y_coord = piece.get_board_index()[1]
+        if piece.pieceType() == 'pawn' and (y_coord == 0 or y_coord == 7):
+            tempButton = piece.get_button()
+            tempColour = piece.get_colour()
+            tempIndex = piece.get_board_index()
+            player = self.firstPlayer if tempColour == self.firstPlayer.getColour() else self.secondPlayer
+            player.getPieces().remove(piece)
+            piece = Queen(tempColour, tempIndex)
+            piece.set_button(tempButton)
+            piece.initButton()
+            piece.get_button().update_image(piece.get_image())
+            player.getPieces().append(piece)
+
     def check_square_for_player_piece(self, boardPos, piece, oppositePlayer):
         if piece.pieceType() != 'pawn' and piece.pieceType() != 'knight':
             if not self.check_squares_in_line(boardPos, piece, oppositePlayer):
                 return None
         return self.piecesBoard[boardPos[0]][boardPos[1]] if self.piecesBoard[boardPos[0]][boardPos[1]] in oppositePlayer.getPieces() else None
-        #for piece in oppositePlayer.getPieces():
-        #    if boardPos == piece.get_board_index():
-        #        return piece
-        #return None
 
     def check_square_valid(self, boardPos, piece):
         if piece.pieceType() != 'knight':
@@ -105,7 +116,6 @@ class Board():
         for boardPos in piece.possible_moves():
             if self.check_out_of_range(boardPos):
                 continue
-
             if not self.check_square_valid(boardPos, piece):
                 continue
             pos = self.board_pos[boardPos[0]][boardPos[1]]
@@ -125,6 +135,37 @@ class Board():
                     "Button": Button(pos[0], pos[1], 'Images/selected.png'),
                     "Piece": attack_piece
                 })
+        if piece.pieceType() == "king" and not piece.has_moved():
+            boardPositions = []
+            if piece.get_colour() == 'black':
+                posToAdd = (piece.get_board_index()[0]+3, piece.get_board_index()[1])
+                if self.piecesBoard[posToAdd[0]+1][posToAdd[1]] is not None and not self.piecesBoard[posToAdd[0]+1][posToAdd[1]].has_moved():
+                    boardPositions.append(posToAdd)
+                posToAdd = (piece.get_board_index()[0]-2, piece.get_board_index()[1])
+                if self.piecesBoard[posToAdd[0]-1][posToAdd[1]] is not None and not self.piecesBoard[posToAdd[0]-1][posToAdd[1]].has_moved():
+                    boardPositions.append(posToAdd)
+            else:
+                posToAdd = (piece.get_board_index()[0]+2, piece.get_board_index()[1])
+                if self.piecesBoard[posToAdd[0]+1][posToAdd[1]] is not None and not self.piecesBoard[posToAdd[0]+1][posToAdd[1]].has_moved():
+                    boardPositions.append(posToAdd)
+                posToAdd = (piece.get_board_index()[0]-3, piece.get_board_index()[1])
+                if self.piecesBoard[posToAdd[0]-1][posToAdd[1]] is not None and not self.piecesBoard[posToAdd[0]-1][posToAdd[1]].has_moved():
+                    boardPositions.append(posToAdd)
+            for boardPos in boardPositions:
+                if self.check_out_of_range(boardPos):
+                    continue
+                if not self.check_square_valid(boardPos, piece):
+                    continue
+                if boardPos[0] - piece.get_board_index()[0] < -2:
+                    boardPos = (boardPos[0]+1, boardPos[1])
+                elif boardPos[0] - piece.get_board_index()[0] > 2:
+                    boardPos = (boardPos[0]-1, boardPos[1])
+                pos = self.board_pos[boardPos[0]][boardPos[1]]
+                self.potentialPositions.append({
+                    "Index": boardPos,
+                    "Button": Button(pos[0], pos[1], 'Images/selected.png'),
+                    "Piece": None
+                })
 
     def get_potentional_positions(self):
         return self.potentialPositions
@@ -142,6 +183,7 @@ class Board():
         oldPos = piece.get_board_index()
         self.piecesBoard[oldPos[0]][oldPos[1]] = None
         piece.move((newBoardPos))
+        self.exchange_pawn_piece(piece)
         pos = self.board_pos[newBoardPos[0]][newBoardPos[1]]
         piece.get_button().move(pos[0], pos[1])
         self.piecesBoard[newBoardPos[0]][newBoardPos[1]] = piece

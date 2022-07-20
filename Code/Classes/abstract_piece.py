@@ -243,6 +243,7 @@ class King(Piece):
             possibleMoves.append((self.boardx+i, self.boardy-i))
             possibleMoves.append((self.boardx-i, self.boardy+i))
             possibleMoves.append((self.boardx-i, self.boardy-i))
+
         return possibleMoves
 
     def possible_moves(self):

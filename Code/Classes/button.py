@@ -22,6 +22,9 @@ class Button():
     def getPos(self):
         return (self.x, self.y)
 
+    def update_image(self, image_path):
+        self.image = pygame.image.load(os.path.join('./', image_path))
+
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
 

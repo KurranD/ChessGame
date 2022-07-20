@@ -2,9 +2,13 @@ from Classes.player import *
 from Classes.abstract_piece import *
 from Classes.button import Button
 from Classes.board import Board
+import sys
 
 class Game():
     def __init__(self, screen):
+        self.create_game(screen)
+
+    def create_game(self, screen):
         board_pos = self.create_board()
         
         self.white_pieces = self.create_pieces('white', screen, board_pos)
@@ -90,14 +94,28 @@ class Game():
         self.game_turn.clear()
         self.game_turn.append(next_turn)
 
+    def game_over(self, player):
+        self.game_state_manager(self.gameState, 'gameOver')
+
     def remove_piece(self, piece):
         player = self.first_player if 'p1' not in self.game_turn else self.second_player
         player.getPieces().remove(piece)
+        if piece.pieceType() == 'king':
+            self.game_over(player)
         piece = None
 
     def select_move(self):
         for move in self.board.get_potentional_positions():
             if move['Button'].click():
+                if self.current_piece.pieceType() == 'king':
+                    posDiff = move['Index'][0] - self.current_piece.get_board_index()[0]
+                    boardLayout = self.board.piecesBoard
+                    if(posDiff > 1):
+                        rook = boardLayout[move['Index'][0]+1][move['Index'][1]] if boardLayout[move['Index'][0]+1][move['Index'][1]] != None else boardLayout[move['Index'][0]+2][move['Index'][1]]
+                        self.board.move_piece(rook, (move['Index'][0]-1, move['Index'][1]))
+                    elif(posDiff < 1):
+                        rook = boardLayout[move['Index'][0]-1][move['Index'][1]] if boardLayout[move['Index'][0]-1][move['Index'][1]] != None else boardLayout[move['Index'][0]-2][move['Index'][1]]
+                        self.board.move_piece(rook, (move['Index'][0]+1, move['Index'][1]))
                 self.board.move_piece(self.current_piece, move['Index'])
                 if(piece := move['Piece']):
                     self.remove_piece(piece)
@@ -113,6 +131,20 @@ class Game():
                 self.board.clear_potential_positions()
                 self.highlight_possible_moves(piece)
                 self.current_piece = piece
+
+    def menu_display(self, gameState, start_button, exit_button):
+        self.gameState = gameState
+        bg = pygame.image.load(os.path.join('./', 'Images/Menu.png'))
+        if start_button.click():
+            bg = pygame.image.load(os.path.join('./', 'Images/chess_board.jpg'))
+            self.game_state_manager(gameState, 'game')
+        if exit_button.click():
+            sys.exit()
+        return bg
+
+    def game_state_manager(self, gameState, new_state):
+        gameState.clear()
+        gameState.append(new_state)
 
     def game(self, screen):
         self.turn(self.first_player, screen) if 'p1' in self.game_turn else self.turn(self.second_player, screen)
