@@ -72,10 +72,5 @@ class TestPieceMethods(unittest.TestCase):
         self.assertRaises(ValueError, lambda: piece.move('2, 2'))
         self.assertRaises(ValueError, lambda: piece.move(('f', 'g')))
 
-    def test_get_possible_moves(self):
-        factory = PieceFactory()
-        piece = factory.create_piece('rook', 'black', 1, 1)
-        print(piece.get_possible_moves())
-
 if __name__ == '__main__':
     unittest.main()
