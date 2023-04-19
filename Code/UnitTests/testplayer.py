@@ -20,6 +20,13 @@ class TestPlayerMethods(unittest.TestCase):
         pieces = self.helper_createCorrectPieces() + self.helper_createCorrectPieces()
         self.assertRaises(ValueError, lambda: Player('white', pieces))
 
+    def test_playerGetMethods(self):
+        pieces = self.helper_createCorrectPieces()
+        colour = 'white'
+        player = Player(colour, pieces)
+        self.assertEqual(pieces, player.get_pieces())
+        self.assertEqual(colour, player.get_colour())
+
     def helper_createCorrectPieces(self):
         factory = PieceFactory()
         pieces_to_create = ['rook', 'bishop', 'knight', 'queen', 'king', 'knight', 'bishop', 'rook']

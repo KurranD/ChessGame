@@ -1,6 +1,6 @@
 from Classes.button import Button
 import json
-from Classes.abstract_piece import *
+from Classes.abstract_piece import Piece
 
 class Board():
     """
@@ -64,7 +64,7 @@ class Board():
                     The pawn that has arrived at the end of the board
         """
         y_coord = piece.get_board_index()[1]
-        if piece.piece_type() == 'pawn' and (y_coord == 0 or y_coord == 7):
+        if piece.get_piece_type() == 'pawn' and (y_coord == 0 or y_coord == 7):
             temp_button = piece.get_button()
             temp_colour = piece.get_colour()
             temp_index = piece.get_board_index()
@@ -72,8 +72,7 @@ class Board():
             player.get_pieces().remove(piece)
             piece = Queen(temp_colour, temp_index)
             piece.set_button(temp_button)
-            piece.init_piece()
-            piece.get_button().update_image(piece.get_image())
+            piece.get_button().update_image(piece.get_image_path())
             player.get_pieces().append(piece)
 
     def __check_square_for_player_piece(self, board_pos, piece, opposite_player):
@@ -94,7 +93,7 @@ class Board():
                 None: if there is no piece capable of being captured
                 Piece Object: If there is a piece which can be captured.
         """
-        if piece.piece_type() != 'pawn' and piece.piece_type() != 'knight':
+        if piece.get_piece_type() != 'pawn' and piece.get_piece_type() != 'knight':
             if not self.__check_squares_in_line(board_pos, piece, opposite_player):
                 return None
         return self.__pieces_board[board_pos[0]][board_pos[1]] if self.__pieces_board[board_pos[0]][board_pos[1]] in opposite_player.get_pieces() else None
@@ -116,7 +115,7 @@ class Board():
                 False: If the square is occupied or unreachable
                 True: If the square is unnocccupied and the piece can move to it
         """
-        if piece.piece_type() != 'knight':
+        if piece.get_piece_type() != 'knight':
             return self.__check_squares_in_line(board_pos, piece)
         else:
             return self.__pieces_board[board_pos[0]][board_pos[1]] == None
@@ -257,7 +256,7 @@ class Board():
                 piece: Piece Object
                     The current selected piece to move
         """
-        for board_pos in piece.possible_moves():
+        for board_pos in piece.get_possible_moves():
             if self.__check_out_of_range(board_pos):
                 continue
             if not self.__check_square_valid(board_pos, piece):
@@ -269,7 +268,7 @@ class Board():
                 "Piece": None
             })
         opposite_player = self.__first_player if self.__second_player.get_colour() == piece.get_colour() else self.__second_player
-        for board_pos in piece.possible_attack_moves():
+        for board_pos in piece.get_possible_attack_moves():
             if self.__check_out_of_range(board_pos):
                 continue
             pos = self.__board_pos[board_pos[0]][board_pos[1]]
@@ -280,7 +279,7 @@ class Board():
                     "Piece": attack_piece
                 })
         # Calculating if castling is possible as a potential move
-        if piece.piece_type() == "king" and not piece.has_moved():
+        if piece.get_piece_type() == "king" and not piece.has_moved():
             board_positions = []
             if piece.get_colour() == 'black':
                 pos_to_add = (piece.get_board_index()[0]+3, piece.get_board_index()[1])
@@ -312,7 +311,7 @@ class Board():
                     "Piece": None
                 })
 
-    def get_potentional_positions(self):
+    def get_potential_positions(self):
         """
             Returns
             -------
@@ -338,7 +337,7 @@ class Board():
         piece_loc = piece.get_board_index()
         self.__pieces_board[piece_loc[0]][piece_loc[1]] = piece
         pos = self.__board_pos[piece_loc[0]][piece_loc[1]]
-        piece.set_button(Button(pos[0], pos[1], piece.get_image()))
+        piece.set_button(Button(pos[0], pos[1], piece.get_image_path()))
 
     def move_piece(self, piece, new_board_pos):
         """
@@ -351,6 +350,10 @@ class Board():
                 new_board_pos: Integer coordinates
                     Coordinates cooresponding to the index in the 2D board array 
         """
+
+        if(not isinstance(piece, Piece) or not isinstance(new_board_pos, tuple) or (new_board_pos[0] < 0 or new_board_pos[0] > 8 or new_board_pos[1] < 0 or new_board_pos[1] > 8)):
+            raise ValueError("Values are not correct for moving a piece. piece: {} coords: {}".format(piece, new_board_pos))
+        
         old_pos = piece.get_board_index()
         self.__pieces_board[old_pos[0]][old_pos[1]] = None
         piece.move((new_board_pos))

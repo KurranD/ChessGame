@@ -68,7 +68,6 @@ class Game():
         pieces = []
         for i in range(amount):
             piece = self.__factory.create_piece(p_type, colour, piece_counter, y_pos)
-            piece.init_piece()
             piece_counter += 1
             pieces.append(piece)
     
@@ -133,7 +132,7 @@ class Game():
         """
         self.__draw_helper(self.__white_pieces, screen)
         self.__draw_helper(self.__black_pieces, screen)
-        for position in self.__board.get_potentional_positions():
+        for position in self.__board.get_potential_positions():
             position['Button'].draw(screen)
 
     def __change_turn(self):
@@ -160,7 +159,7 @@ class Game():
         """
         player = self.__first_player if 'p1' != self.__game_turn else self.__second_player
         player.get_pieces().remove(piece)
-        if piece.piece_type() == 'king':
+        if piece.get_piece_type() == 'king':
             self.__game_over()
         piece = None
 
@@ -174,9 +173,9 @@ class Game():
 
             The second section is contained in the if statement for the condition that the piece selected is the king and it hasn't moved yet. This logic is to handle castling (swapping the rook and king) which requires a bit more involved logic than the other moves since two pieces move.
         """
-        for move in self.__board.get_potentional_positions():
+        for move in self.__board.get_potential_positions():
             if move['Button'].click():
-                if self.__current_piece.piece_type() == 'king' and not self.__current_piece.has_moved():
+                if self.__current_piece.get_piece_type() == 'king' and not self.__current_piece.has_moved():
                     pos_diff = move['Index'][0] - self.__current_piece.get_board_index()[0]
                     board_layout = self.__board.get_pieces_board()
                     if(pos_diff > 1):

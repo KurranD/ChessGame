@@ -28,8 +28,22 @@ class TestBoardMethods(unittest.TestCase):
         self.assertRaises(ValueError, lambda: Board(board_pos, first_player, second_player))
         board_pos = [ ['a']*8 for i in range(8)]
         self.assertRaises(ValueError, lambda: Board(board_pos, first_player, second_player))
-        
 
+    def test_movePieceOnBoard(self):
+        first_player = Player('white', self.helper_createCorrectPieces())
+        second_player = Player('black', self.helper_createCorrectPieces())
+        board_pos = self.helper_createBoard()
+        testBoard = Board(board_pos, first_player, second_player)
+        new_position = (2, 2)
+        # Confirm that move_piece() works as intended
+        self.assertEqual(None, testBoard.move_piece(first_player.get_pieces()[0], new_position))
+        self.assertEqual(new_position, first_player.get_pieces()[0].get_board_index())
+        # Confirm move_piece() raises error when invalid input is passed in
+        self.assertRaises(ValueError, lambda: testBoard.move_piece([], (2, 2)))
+        self.assertRaises(ValueError, lambda: testBoard.move_piece(first_player.get_pieces()[0], 0))
+        self.assertRaises(ValueError, lambda: testBoard.move_piece(first_player.get_pieces()[0], (0, 12)))
+        self.assertRaises(ValueError, lambda: testBoard.move_piece(first_player.get_pieces()[0], (-2, 3)))
+        
     def helper_createBoard(self):
         board = [ [0]*8 for i in range(8)]
         x_coord = 60
@@ -53,9 +67,6 @@ class TestBoardMethods(unittest.TestCase):
         for piece in pieces_to_create:
             pieces.append(factory.create_piece(piece, 'black', 7, other_piece_counter))
             other_piece_counter += 1
-        
-        for piece in pieces:
-            piece.init_piece()
         
         return pieces
 

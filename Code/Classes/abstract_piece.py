@@ -34,20 +34,11 @@ class Piece(ABC):
         self.__button = None
 
     def __piece_error_handling(self, board_pos):
-        x_pos = board_pos[0]
-        y_pos = board_pos[1]
-        if(x_pos == None or y_pos == None or x_pos < 0 or x_pos > 8 or y_pos < 0 or y_pos > 8):
+        if(not isinstance(board_pos, tuple) or not isinstance(board_pos[0], int) or not isinstance(board_pos[1], int) or board_pos[0] < 0 or board_pos[0] > 8 or board_pos[1] < 0 or board_pos[1] > 8):
             raise ValueError("Assigned positions must be within the board's 9x9 grid.")
 
     @abstractmethod
-    def init_piece(self):
-        """
-        Abstract method for initializing the Button object's image (Image of the piece)
-        """
-        pass
-
-    @abstractmethod
-    def piece_type(self):
+    def get_piece_type(self):
         """
         Abstract method to return piece type
         
@@ -59,7 +50,7 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def possible_moves(self):
+    def get_possible_moves(self):
         """
         Abstract method for calculating the potential moves a piece is capable of making. (All pieces calculate their moves generically. The board will be responsable for preventing pieces from going over the edge or moving over one another)
         
@@ -71,7 +62,7 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         """
         Abstract method for calculating the potential moves a piece is capable of making to take another piece (All pieces calculate their moves generically. The board will be responsable for preventing pieces from going over the edge or moving over one another)
         
@@ -176,19 +167,23 @@ class Piece(ABC):
         return (self.__boardx, self.__boardy)
 
 class Pawn(Piece):
-    def init_piece(self):
-        self.__image = 'Images/pawn.png' if self.get_colour() == 'white' else 'Images/pawn_b.png'
+    def __init__(self, colour, board_pos):
+        super().__init__(colour, board_pos)
+        self.__init_piece()
+    
+    def __init_piece(self):
+        self.__image_path = 'Images/pawn.png' if self.get_colour() == 'white' else 'Images/pawn_b.png'
 
-    def piece_type(self):
+    def get_piece_type(self):
         return 'pawn'
 
-    def get_image(self):
-        return self.__image
+    def get_image_path(self):
+        return self.__image_path
 
     def move(self, board_pos):
         super().move(board_pos)
 
-    def possible_moves(self):
+    def get_possible_moves(self):
         possible_moves = []
         board_pos_x, board_pos_y = super().get_board_index()
         yoffset = 1 if self.get_colour() == 'black' else -1
@@ -197,7 +192,7 @@ class Pawn(Piece):
             possible_moves.append((board_pos_x, board_pos_y+yoffset*2))
         return possible_moves
 
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         possible_moves = []
         board_pos_x, board_pos_y = super().get_board_index()
         yoffset = 1 if self.get_colour() == 'black' else -1
@@ -206,14 +201,18 @@ class Pawn(Piece):
         return possible_moves
 
 class Rook(Piece):
-    def init_piece(self):
-        self.__image = 'Images/rook.png' if self.get_colour() == 'white' else 'Images/rook_b.png'
+    def __init__(self, colour, board_pos):
+        super().__init__(colour, board_pos)
+        self.__init_piece()
+    
+    def __init_piece(self):
+        self.__image_path = 'Images/rook.png' if self.get_colour() == 'white' else 'Images/rook_b.png'
 
-    def piece_type(self):
+    def get_piece_type(self):
         return 'rook'
 
-    def get_image(self):
-        return self.__image
+    def get_image_path(self):
+        return self.__image_path
 
     def move(self, board_pos):
         super().move(board_pos)
@@ -228,21 +227,25 @@ class Rook(Piece):
             possible_moves.append((board_pos_x-i, board_pos_y))
         return possible_moves
 
-    def possible_moves(self):
+    def get_possible_moves(self):
         return self.__moves_helper()
 
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         return self.__moves_helper()
 
 class Bishop(Piece):
-    def init_piece(self):
-        self.__image = 'Images/bishop.png' if self.get_colour() == 'white' else 'Images/bishop_b.png'
+    def __init__(self, colour, board_pos):
+        super().__init__(colour, board_pos)
+        self.__init_piece()
+    
+    def __init_piece(self):
+        self.__image_path = 'Images/bishop.png' if self.get_colour() == 'white' else 'Images/bishop_b.png'
 
-    def piece_type(self):
+    def get_piece_type(self):
         return 'bishop'
 
-    def get_image(self):
-        return self.__image
+    def get_image_path(self):
+        return self.__image_path
 
     def move(self, board_pos):
         super().move(board_pos)
@@ -257,21 +260,25 @@ class Bishop(Piece):
             possible_moves.append((board_pos_x-i, board_pos_y-i))
         return possible_moves
 
-    def possible_moves(self):
+    def get_possible_moves(self):
         return self.__moves_helper()
 
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         return self.__moves_helper()
 
 class Knight(Piece):
-    def init_piece(self):
-        self.__image = 'Images/knight.png' if self.get_colour() == 'white' else 'Images/knight_b.png'
+    def __init__(self, colour, board_pos):
+        super().__init__(colour, board_pos)
+        self.__init_piece()
+    
+    def __init_piece(self):
+        self.__image_path = 'Images/knight.png' if self.get_colour() == 'white' else 'Images/knight_b.png'
 
-    def piece_type(self):
+    def get_piece_type(self):
         return 'knight'
 
-    def get_image(self):
-        return self.__image
+    def get_image_path(self):
+        return self.__image_path
 
     def move(self, board_pos):
         super().move(board_pos)
@@ -289,21 +296,25 @@ class Knight(Piece):
         possible_moves.append((board_pos_x-2, board_pos_y-1))
         return possible_moves
 
-    def possible_moves(self):
+    def get_possible_moves(self):
         return self.__moves_helper()
 
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         return self.__moves_helper()
 
 class Queen(Piece):
-    def init_piece(self):
-        self.__image = 'Images/queen.png' if self.get_colour() == 'white' else 'Images/queen_b.png'
+    def __init__(self, colour, board_pos):
+        super().__init__(colour, board_pos)
+        self.__init_piece()
+    
+    def __init_piece(self):
+        self.__image_path = 'Images/queen.png' if self.get_colour() == 'white' else 'Images/queen_b.png'
 
-    def piece_type(self):
+    def get_piece_type(self):
         return 'queen'
 
-    def get_image(self):
-        return self.__image
+    def get_image_path(self):
+        return self.__image_path
 
     def move(self, board_pos):
         super().move(board_pos)
@@ -322,21 +333,25 @@ class Queen(Piece):
             possible_moves.append((board_pos_x-i, board_pos_y-i))
         return possible_moves
 
-    def possible_moves(self):
+    def get_possible_moves(self):
         return self.__moves_helper()
 
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         return self.__moves_helper()
 
 class King(Piece):
-    def init_piece(self):
-        self.__image = 'Images/king.png' if self.get_colour() == 'white' else 'Images/king_b.png'
+    def __init__(self, colour, board_pos):
+        super().__init__(colour, board_pos)
+        self.__init_piece()
+    
+    def __init_piece(self):
+        self.__image_path = 'Images/king.png' if self.get_colour() == 'white' else 'Images/king_b.png'
 
-    def piece_type(self):
+    def get_piece_type(self):
         return 'king'
 
-    def get_image(self):
-        return self.__image
+    def get_image_path(self):
+        return self.__image_path
 
     def move(self, board_pos):
         super().move(board_pos)
@@ -356,8 +371,8 @@ class King(Piece):
 
         return possible_moves
 
-    def possible_moves(self):
+    def get_possible_moves(self):
         return self.__moves_helper()
 
-    def possible_attack_moves(self):
+    def get_possible_attack_moves(self):
         return self.__moves_helper()

@@ -4,13 +4,6 @@ import os
 class Button():
     """
         Class for abstracting away making objects clickable and loading images.
-
-        Suggestions:
-        In the constructor, you set the size of the button to a fixed size of (200, 100) if no image is provided. It would be more flexible to allow the caller to specify the size of the button as a parameter.
-When loading the image in the constructor, you use a relative path to the image file. This could potentially cause problems if the caller is not running the program from the same working directory as the script. It would be better to use an absolute path or provide a way for the caller to specify the path to the image file.
-In the update_image() method, you reload the image from the file each time the method is called. This could potentially slow down the program if the image needs to be updated frequently. It would be more efficient to load the image once in the constructor and store it as a member variable, then update the member variable when the image needs to be changed.
-In the click() method, you use pygame.mouse.get_pressed()[0] to check if the left mouse button is pressed. This assumes that the left mouse button is the only button that can be used to click the button. It would be better to check if any mouse button is pressed using pygame.mouse.get_pressed() and then check if the button that was pressed was the left button using event.button == 1.
-It's generally a good practice to have a __repr__() method for your classes, so that you can print out a human-readable representation of the object for debugging purposes.
     """
     def __init__(self, x_pos, y_pos, image_path=None):
         """
@@ -36,7 +29,7 @@ It's generally a good practice to have a __repr__() method for your classes, so 
         self.__clicked = False
 
     def __button_error_handling(self, x_pos, y_pos, image_path):
-        if x_pos < 0 or x_pos > 690 or y_pos < 0 or y_pos > 690:
+        if x_pos == None or y_pos == None or x_pos < 0 or x_pos > 690 or y_pos < 0 or y_pos > 690:
             raise ValueError("Button coordinates outside the screen: ({},{})".format(x_pos, y_pos))
         if(image_path != None and not os.path.isfile(image_path)):
                 raise ValueError("Image can't be found: {}".format(image_path))
@@ -52,6 +45,7 @@ It's generally a good practice to have a __repr__() method for your classes, so 
                 y_pos: integer
                     Pixel y-coordinate for the button
         """
+        self.__button_error_handling(x_pos, y_pos, None)
         self.__rect.topleft = (x_pos,  y_pos)
 
     def update_image(self, image_path):
@@ -63,6 +57,9 @@ It's generally a good practice to have a __repr__() method for your classes, so 
                 image_path: string
                     The path for the new image to use
         """
+        if(image_path == None or not os.path.isfile(image_path)):
+            raise ValueError("Image can't be found: {}".format(image_path))
+        
         self.__image = pygame.image.load(os.path.join('./', image_path))
 
     def draw(self, screen):
